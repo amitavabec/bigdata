@@ -25,12 +25,28 @@ class Utils extends Serializable {
         var sortedfrequencies = frequencies.sortBy(x => x._2, false)
         return sortedfrequencies.take(topn)
     }
+	
+	
+	def parseLogLine(log: String):
+	LogRecord = {
+		val res = PATTERN.findFirstMatchIn(log) 
+		if (res.isEmpty)
+		{
+			println("Rejected Log Line: " + log)
+			LogRecord("Empty", "", "",  -1 )
+		}
+		else 
+		{
+			val m = res.get
+			LogRecord(m.group(1), m.group(4),m.group(6), m.group(8).toInt)
+		}
+	}
 }
 
 object EntryPoint {
     val usage = """
         Usage: EntryPoint <how_many> <file_or_directory_in_hdfs>
-        Eample: EntryPoint 10 /data/spark/project/access/access.log.45.gz
+        Eample: EntryPoint 10 /data/spark/project/NASA_access_log_Aug95.gz
     """
     
     def main(args: Array[String]) {
@@ -55,5 +71,22 @@ object EntryPoint {
         for(i <- top10){
             println(i)
         }
+		
+		val accessLog = logFile.map(parseLogLine)
+		val accessDf = accessLog.toDF()
+		accessDf.printSchema
+		accessDf.createOrReplaceTempView("nasalog")
+		val output = spark.sql("select * from nasalog")
+		output.createOrReplaceTempView("nasa_log")
+		spark.sql("cache TABLE nasa_log")
+		spark.sql("select url,count(*) as req_cnt from nasa_log where upper(url) like '%HTML%' group by url order by req_cnt desc LIMIT 10").show
+
+		spark.sql("select host,count(*) as req_cnt from nasa_log group by host order by req_cnt desc LIMIT 5").show
+
+		spark.sql("select substr(timeStamp,1,14) as timeFrame,count(*) as req_cnt from nasa_log group by substr(timeStamp,1,14) order by req_cnt desc LIMIT 5").show
+
+		spark.sql("select substr(timeStamp,1,14) as timeFrame,count(*) as req_cnt from nasa_log group by substr(timeStamp,1,14) order by req_cnt  LIMIT 5").show
+
+		spark.sql("select httpCode,count(*) as req_cnt from nasa_log group by httpCode ").show
     }
 }
