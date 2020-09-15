@@ -72,7 +72,7 @@ object EntryPoint {
             println(i)
         }
 		
-		val accessLog = logFile.map(parseLogLine)
+		var accessLog = logFile.map(parseLogLine)
 		val accessDf = accessLog.toDF()
 		accessDf.printSchema
 		accessDf.createOrReplaceTempView("nasalog")
