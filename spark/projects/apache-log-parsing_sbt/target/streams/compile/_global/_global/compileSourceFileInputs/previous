@@ -1,0 +1,1 @@
+["sbt.Task[scala.collection.immutable.Map[java.lang.String, scala.collection.Seq[scala.Tuple2[java.nio.file.Path, sbt.nio.FileStamp]]]]",{"2.10.4":{"hashes":[["D:\\github\\bigdata\\spark\\projects\\apache-log-parsing_sbt\\src\\main\\scala\\com\\cloudxlab\\logparsing\\log-parser.scala","e36991c6f1b861d70848b2063cf4508c8de78da1"]],"lastModifiedTimes":[]}}]
